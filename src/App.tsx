@@ -5,17 +5,17 @@ import { render } from 'react-dom';
 
 interface Product {
   id: number;
-  thumbnail:string;
+  thumbnail: string;
   title: string;
   price: number;
   description: string;
-  qty:number
+  qty: number;
 }
 
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
-  const[counter,setCounter] = useState<number>(0);
- 
+  const [cart, setCart] = useState<Product[]>([]);
+  const [showCart, setShowCart] = useState<boolean>(false); // Nuovo stato per la visualizzazione del carrello
 
   useEffect(() => {
     async function getCard() {
@@ -27,44 +27,62 @@ function App() {
         console.error("Error fetching data:", error);
       }
     }
-
-
-    
     getCard();
-  }, []); 
+  }, []);
+
   function aggiungiCarello(productId: number) {
-    const updatedProducts = products.map(product => {
-      if (product.id === productId && product.qty > 0) {
-        setCounter(counter + 1);
-        return { ...product, qty: product.qty - 1 };
-      }
-      return product;
-    });
-  
-    setProducts(updatedProducts);
+    const productToAdd = products.find(product => product.id === productId && product.qty > 0);
+    if (productToAdd) {
+      setCart(prevCart => [...prevCart, productToAdd]);
+      setProducts(prevProducts =>
+        prevProducts.map(product =>
+          product.id === productId ? { ...product, qty: product.qty - 1 } : product
+        )
+      );
+    }
   }
-  
+
+  // Calcolo del prezzo totale del carrello
+  const totalPrice = cart.reduce((total, product) => total + product.price, 0);
 
   return (
-   <div id='container'>
-    <div id='nav'>
-      <div id='container-counter'><h1 id='text-count' style={counter === 0 ? {display:'none'}: {display:'flex'}}>{counter}</h1></div>
-    <img id='img' src={require('./png-clipart-computer-icons-shopping-cart-shopping-cart-text-shopping-centre.png')}  alt="" />
-      <h1>Shop</h1>
-    </div>
-    <div id='container-card'>
-
-      {products.map((product) => (
-        <div key={product.id} className="card">
-          <img src={product.thumbnail} alt="" />
-          <h2>{product.title}</h2>
-          <p>{product.description}</p>
-          <p>Price: ${product.price}  Qt:{product.qty}</p>
-          <button onClick={() => aggiungiCarello(product.id)} disabled={product.qty === 0}>Aggiungi al carrello</button>
+    <div id='container'>
+      <div id='nav'>
+        <div id='container-counter'>
+          <h1 id='text-count' style={{ display: cart.length === 0 ? 'none' : 'flex' }}>{cart.length}</h1>
         </div>
-      ))}
-     </div>
-  </div>
+        <img id='img' src={require('./png-clipart-computer-icons-shopping-cart-shopping-cart-text-shopping-centre.png')} alt=""
+          onClick={() => setShowCart(!showCart)} /> {/* Toggle dello stato showCart al clic sull'immagine */}
+        <h1>Shop</h1>
+      </div>
+      <div id='container-card'>
+        {showCart ? (
+          cart.map(product => (
+            <div key={product.id} className="card">
+              <img src={product.thumbnail} alt="" />
+              <h2>{product.title}</h2>
+              <p>{product.description}</p>
+              <p>Price: ${product.price}</p>
+            </div>
+          ))
+        ) : (
+          products.map(product => (
+            <div key={product.id} className="card">
+              <img src={product.thumbnail} alt="" />
+              <h2>{product.title}</h2>
+              <p>{product.description}</p>
+              <p>Price: ${product.price}  Qt:{product.qty}</p>
+              <button onClick={() => aggiungiCarello(product.id)} disabled={product.qty === 0}>Aggiungi al carrello</button>
+            </div>
+          ))
+        )}
+      </div>
+      {showCart && (
+        <div id="total-price">
+          Total Price: ${totalPrice.toFixed(2)}
+        </div>
+      )}
+    </div>
   );
 }
 
