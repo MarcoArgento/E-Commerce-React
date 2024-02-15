@@ -32,9 +32,23 @@ code {
   width: 20%;
 }
 #nav {
+  margin-top: 1%;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+#container-counter {
+  margin: -2%;
+    position: absolute;
+    margin-left: 93%;
+}
+#text-count {
+  justify-content: center;
+    display: flex;
+    width: 25px;
+    background-color: red;
+    border-radius: 20px;
+    font-size: 20px;
 }
 #img {
   margin-right: 1%;

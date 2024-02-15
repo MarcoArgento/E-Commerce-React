@@ -9,10 +9,12 @@ interface Product {
   title: string;
   price: number;
   description: string;
+  qty:number
 }
 
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
+  const[counter,setCounter] = useState<number>(0);
  
 
   useEffect(() => {
@@ -30,11 +32,24 @@ function App() {
     
     getCard();
   }, []); 
+  function aggiungiCarello(productId: number) {
+    const updatedProducts = products.map(product => {
+      if (product.id === productId && product.qty > 0) {
+        setCounter(counter + 1);
+        return { ...product, qty: product.qty - 1 };
+      }
+      return product;
+    });
+  
+    setProducts(updatedProducts);
+  }
+  
 
   return (
    <div id='container'>
     <div id='nav'>
-    <img id='img' src={require('./png-clipart-computer-icons-shopping-cart-shopping-cart-text-shopping-centre.png')} alt="" />
+      <div id='container-counter'><h1 id='text-count' style={counter === 0 ? {display:'none'}: {display:'flex'}}>{counter}</h1></div>
+    <img id='img' src={require('./png-clipart-computer-icons-shopping-cart-shopping-cart-text-shopping-centre.png')}  alt="" />
       <h1>Shop</h1>
     </div>
     <div id='container-card'>
@@ -44,8 +59,8 @@ function App() {
           <img src={product.thumbnail} alt="" />
           <h2>{product.title}</h2>
           <p>{product.description}</p>
-          <p>Price: ${product.price}</p>
-          <button>Aggiungi al carrello</button>
+          <p>Price: ${product.price}  Qt:{product.qty}</p>
+          <button onClick={() => aggiungiCarello(product.id)} disabled={product.qty === 0}>Aggiungi al carrello</button>
         </div>
       ))}
      </div>
